@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Customer List</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Customer List</h1>
+        <button id="customer" class="btn btn-success" onclick="getCustomers()">Get All Customers</button>
+        <table class="table table-bordered mt-3">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Address</th>
+                    <th>Order List</th>
+                </tr>
+            </thead>
+            <tbody id="tab">
+                <!-- Table content will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Include Bootstrap JavaScript and jQuery (optional) for additional functionality -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function getCustomers() {
+            var table = document.getElementById("tab");
+            table.innerHTML = ``;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/customers", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                    	console.log("jhsdgfryh");
+                        var data = JSON.parse(xhr.responseText);
+                        var tab = document.getElementById("tab");
+                        console.log(data);
+                        data.forEach(function (x) {
+                            var tr = document.createElement("tr");
+                            
+                            var td1 = document.createElement("td");
+                            td1.id = "c_id" + x.c_id;
+                            var td2 = document.createElement("td");
+                            td2.id = "c_name" + x.c_name;
+                            var td3 = document.createElement("td");
+                            td3.id = "c_mobile" + x.c_mobile;
+                            var td4 = document.createElement("td");
+                            td4.id = "c_address" + x.c_address;
+                            var td5 = document.createElement("td");
+                           
+                            var button = document.createElement("button");
+                            button.textContent = "Order List";
+                            button.classList.add("btn", "btn-primary");
+                            button.onclick = function () {
+                                window.location.href = "orderslist.html?c_id=" + x.c_id;
+                            };
+                            
+                            td1.textContent = x.c_id;
+                            td2.textContent = x.c_name;
+                            td3.textContent = x.c_mobile;
+                            td4.textContent = x.c_address;
+                            td5.appendChild(button);
+                            tr.appendChild(td1);
+                            tr.appendChild(td2);
+                            tr.appendChild(td3);
+                            tr.appendChild(td4);
+                            tr.appendChild(td5);
+                            tab.appendChild(tr);
+                        });
+                    } else {
+                        console.error("Error: " + xhr.status);
+                    }
+                }
+            }
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Management</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 align="center">Customer Orders</h1>
+    <form align="center">
+        
+            <label for="order_id">Order ID</label>
+            <input type="text"  id="order_id"><br>
+       
+        
+            <label for="c_id">Customer ID</label>
+            <input type="text" id="c_id" readonly><br>
+       
+     
+            <label for="product_id">Product ID</label>
+            <input type="text" id="product_id"><br>
+    
+      
+            <label for="product_name">Product Name</label>
+            <input type="text" id="product_name"><br>
+
+       
+            <label for="gst">GST</label>
+            <input type="text" id="gst"><br>
+      
+        
+            <label for="product_price">Product Price</label>
+            <input type="text" id="product_price"><br>
+  
+       
+            <label for="order_address">Order Address</label>
+            <input type="text" id="order_address"><br>
+      
+        <button type="button" class="btn btn-primary" onclick="save()">Save</button>
+        <button type="button" class="btn btn-success" onclick="AddOrder()">Add Order</button>
+    </form>
+
+    <h2>Orders List</h2>
+    <button class="btn btn-success" onclick="getOrders()">Get All Orders</button>
+    <table class="table table-bordered mt-3">
+        <thead class="thead-dark">
+            <tr>
+                <th>Order ID</th>
+                <th>Customer ID</th>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>GST</th>
+                <th>Product Price</th>
+                <th>Order Address</th>
+                <th>Update action</th>
+                <th>Delete action</th>
+            </tr>
+        </thead>
+        <tbody id="tab">
+            <!-- Table content will be added dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Include Bootstrap JS (Popper.js and jQuery are required for Bootstrap) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+function getQueryParameter(parameter) {
+	var urlParams = new URLSearchParams(window.location.search);
+	return urlParams.get(parameter);
+}
+
+var c_id = getQueryParameter("c_id");
+document.getElementById("c_id").value = c_id;
+
+function getOrders() {
+	var table = document.getElementById("tab");
+	table.innerHTML = "";
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "/order/" + c_id, true);
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				var data = JSON.parse(xhr.responseText);
+				var tab = document.getElementById("tab");
+				console.log(data);
+				data.forEach(function (x) {
+					var tr = document.createElement("tr");
+					var td1 = document.createElement("td");
+					var td2 = document.createElement("td");
+					var td3 = document.createElement("td");
+					var td4 = document.createElement("td");
+					var td5 = document.createElement("td");
+					var td6 = document.createElement("td");
+					var td7 = document.createElement("td"); 
+					var td8 = document.createElement("td"); 
+					var td9 = document.createElement("td"); 
+					var button1 = document.createElement("button");
+					var button2 = document.createElement("button");
+					button1.onclick = function () {
+						updateOrder(x);
+					};
+					button2.onclick = function () {
+						deleteorder(x.order_id);
+					};
+					button1.textContent = "Update";
+					button2.textContent = "Delete";
+					td1.textContent = x.order_id;
+					td2.textContent = x.c_id;
+					td3.textContent = x.product_id;
+					td4.textContent = x.product_name;
+					td5.textContent = x.gst; 
+					td6.textContent = x.product_price; 
+					td7.textContent = x.order_address; 
+					td8.appendChild(button1);
+					td9.appendChild(button2);
+					tr.appendChild(td1);
+					tr.appendChild(td2);
+					tr.appendChild(td3);
+					tr.appendChild(td4);
+					tr.appendChild(td5);
+					tr.appendChild(td6);
+					tr.appendChild(td7);
+					tr.appendChild(td8);
+					tr.appendChild(td9);
+					tab.appendChild(tr);
+				});
+			} else {
+				console.error("Error: " + xhr.status);
+			}
+		}
+	};
+	xhr.send();
+}
+
+function AddOrder() {
+	var Data = {
+		order_id: document.getElementById("order_id").value,
+		c_id: document.getElementById("c_id").value,
+		product_id: document.getElementById("product_id").value,
+		product_name: document.getElementById("product_name").value,
+		gst: document.getElementById("gst").value, 
+		product_price: document.getElementById("product_price").value, 
+		order_address: document.getElementById("order_address").value, 
+	};
+	console.log(Data);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/additem", true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var jsonData = JSON.stringify(Data);
+	console.log(jsonData);
+
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4 && xhr.status === 201) {
+			alert("Order details have been added successfully");
+		}
+	};
+
+	xhr.send(jsonData);
+}
+
+function deleteorder(order_id) {
+	var a = new XMLHttpRequest();
+	a.open("DELETE", "/deleteitem/" + order_id, true);
+	a.send();
+	a.onreadystatechange = function () {
+		if (a.readyState === 4) {
+			if (a.status === 200) {
+				alert("Order Deleted, please click OK for further proceedings");
+			}
+		}
+	};
+}
+
+function updateOrder(x) {
+	document.getElementById("order_id").value = x.order_id;
+	document.getElementById("c_id").value = x.c_id;
+	document.getElementById("product_id").value = x.product_id;
+	document.getElementById("product_name").value = x.product_name;
+	document.getElementById("gst").value = x.gst; 
+	document.getElementById("product_price").value = x.product_price; 
+	document.getElementById("order_address").value = x.order_address; 
+}
+
+function save() {
+	var order_id = document.getElementById("order_id").value;
+	var Data = {
+		order_id: document.getElementById("order_id").value,
+		c_id: document.getElementById("c_id").value,
+		product_id: document.getElementById("product_id").value,
+		product_name: document.getElementById("product_name").value,
+		gst: document.getElementById("gst").value, 
+		product_price: document.getElementById("product_price").value,
+		order_address: document.getElementById("order_address").value, 
+	};
+	console.log(Data);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("PUT", "/save/" + order_id, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var jsonData = JSON.stringify(Data);
+
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				alert("Order Updated successfully");
+			} else {
+				alert("Failed to Update order");
+			}
+		}
+	};
+
+	xhr.send(jsonData);
+}
+</script>
+</body>
+</html>
